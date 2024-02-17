@@ -1,7 +1,6 @@
 const complimentBtn = document.getElementById("complimentButton")
 const fortuneBtn = document.getElementById("fortuneButton")
 const form = document.querySelector("form")
-const buttonChange = document.querySelector("updateTime")
 
 const goalsContainer = document.getElementById("goals")
 
@@ -25,12 +24,25 @@ const getFortune = () => {
     })
 }
 
-const goalCallback = ({ data: goals}) => displayGoals(goals)
+const getGoals = () => axios.get(`${baseURL}goals`).then(goalCallback).catch(errCallback)
+
+const goalCallback = ({ data: goals}) => {  
+    displayGoals(goals)
+    console.log('goalCallback is being run, html should update')
+}
 const errCallback = err => console.log(err)
 
-const createGoal = (body) => {
-    axios.post(`${baseURL}goals`, body)
-        .then(goalCallback).catch(errCallback)
+const createGoal = body => axios.post(`${baseURL}goals`, body).then(goalCallback).catch(errCallback)
+
+console.log(`${baseURL}goals`)
+
+const updateGoal = (id, type) => {
+    console.log(id)
+    console.log(type)
+
+    axios.put(`${baseURL}goals/${id}`, { date: type })
+        .then(goalCallback)
+        .catch(errCallback)
 }
 
 const submitGoal = (e) => {
@@ -40,15 +52,18 @@ const submitGoal = (e) => {
     let date = document.querySelector('#whenGoalCompleted')
     let id = goal.value.replace(/\s+/g, '')
 
-    // console.log(id)
+    console.log(`submitGoal goal: ${goal.value}`)
+    console.log(`submitGoal gate: ${date.value}`)
+    console.log(`submitGoal ID: ${id}`)
 
     let bodyObj = {
-        id,
+        elementId: id,
         goal: goal.value,
         date: date.value
     }
 
-    createGoalList(bodyObj)
+    createGoal(bodyObj)
+
 
     goal.value = ''
     date.value = ''
@@ -62,46 +77,41 @@ const createGoalList = (goal) => {
 
     const goalIdWithoutSpaces = goal.goal.replace(/\s+/g, '');
 
-    goalList.innerHTML = `<p>${goal.goal} - Done by: ${goal.date}<button class="delete-btn" id="${goalIdWithoutSpaces}-delete">X</button><button id="${goalIdWithoutSpaces}-update">Update to Unlimited Time</button></p>`
+    goalList.innerHTML = `<p>${goal.goal} - Done by: ${goal.date}</p>`
+
+    const createDateInput = document.createElement('input')
+    createDateInput.type = "date"
+    createDateInput.id = `${goalIdWithoutSpaces}-createDateInput`
+
+    console.log(`ID: ${goal.id}`)
+
+    const deleteBtn = document.createElement('button')
+    deleteBtn.id = `delete-${goal.id}`
+    deleteBtn.textContent = "X"
+    deleteBtn.addEventListener("click", (() => {
+        deleteGoal(goal.id)
+    }))
 
     // Select the delete button by its id
-    const deleteBtn = document.getElementById(`${goalIdWithoutSpaces}-delete`)
-    const updateBtn = document.getElementById(`${goalIdWithoutSpaces}-update`)
+    const updateBtn = document.createElement('button') //document.getElementById(`update${}`)
+    updateBtn.id = `update-${goal.id}`
+    updateBtn.textContent = 'Update Button'
+    updateBtn.addEventListener('click', (() => {
 
-    console.log(goalIdWithoutSpaces)
+        const newDateInput = document.getElementById(`${goalIdWithoutSpaces}-createDateInput`)
+        const newDate = newDateInput.value
+        updateGoal(goal.id, newDate)
+    }))
 
+    // console.log(goalIdWithoutSpaces)
+
+    // createForm.appendChild(createField)
+    // createForm.appendChild(updateBtn)
+    goalList.appendChild(deleteBtn)
+    goalList.appendChild(createDateInput)
+    goalList.appendChild(updateBtn)
     goalsContainer.appendChild(goalList);
-
-    // Add click event listener to the delete button if it exists
-    if (deleteBtn) {
-        console.log("delete button was created")
-        deleteBtn.addEventListener('click', deleteGoal(goalIdWithoutSpaces))
-    } else {
-        console.log("deleteBtn is false")
-    }
-
-    console.log(updateBtn)
-
-    if (updateBtn) {
-        console.log("update button was created");
-        updateBtn.addEventListener('click', () => updateGoal(goalIdWithoutSpaces));
-    } else {
-        console.log("updateBtn is false")
-    }
-
-// deleteBtn.addEventListener('click', deleteGoal(goalIdWithoutSpaces)) {
-//     if (event.target.classList.contains('delete-btn')) {
-//         const goalIdWithoutSpaces = event.target.id;
-//     }git
-// }
 }
-
-goalsContainer.addEventListener('click', function(event) {
-    if (event.target.classList.contains('delete-btn')) {
-        const goalIdWithoutSpaces = event.target.id;
-        deleteGoal(goalIdWithoutSpaces);
-    }
-})
 
 const displayGoals = (arr) => {
     goalsContainer.innerHTML = ``
@@ -110,16 +120,12 @@ const displayGoals = (arr) => {
     }
 }
 
-const updateGoal = (id) => {
-    axios.put(`${baseURL}goals/${id}`, { date: "unlimited time" })
-        .then(goalCallback)
-        .catch(errCallback);
-}
-
 complimentBtn.addEventListener('click', getCompliment)
 fortuneBtn.addEventListener('click', getFortune)
 form.addEventListener('submit', submitGoal)
 
-// document.addEventListener('DOMContentLoaded', () => {
-//     // Call displayGoals after DOM is fully loaded
-//     displayGoals(goals);
+if (getGoals() == true) {
+    getGoals()
+} else {
+    console.log('getGoals() is not true')
+}

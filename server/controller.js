@@ -1,5 +1,6 @@
 // let globalID = 0;
 const goals = []
+let globalID = 0
 
 module.exports = {
 
@@ -44,43 +45,97 @@ module.exports = {
 
         res.status(200).send(randomFortune)
     },
+    getGoal: (req, res) => {
+        res.status(200).send(goals)
+    },
 
     createGoal: (req, res) => {
-        let { goal, date } = req.body
+        let { elementId, goal, date } = req.body
 
         let newGoal = {
-            id,
+            id: globalID,
+            elementId,
             goal,
             date
 
         }
 
+        console.log(globalID)
+
+        console.log(newGoal)
+
+        console.log("controller.js has createGoal working")
+        globalID++
+
         goals.push(newGoal)
+        console.log("createGoal is running")
+        console.log(`goals ${goals}`)
         res.status(200).send(goals)
 
         // globalID = globalID + 1
+
+
     },
 
     deleteGoal: (req, res) => {
-        const id = req.params.id
+        const {id} = req.params
+
+        console.log("This is running: deleteGoal")
+        console.log(id)
 
         const index = goals.findIndex(gl => {
             return gl.id === +id
         })
 
+        console.log(index)
+        console.log(`Before splice: ${goals.length}`)
         goals.splice(index, 1)
+        console.log(`After splice: ${goals.length}`)
         res.status(200).send(goals)
     },
     updateGoal: (req, res) => {
+        console.log("Update goal request received")
         const { id } = req.params;
-    
-        const index = goals.findIndex(gl => gl.id === +id);
-        if (index !== -1) {
-            goals[index].date = "unlimited time";
-            res.status(200).send(goals[index]); // Sending back the updated goal
-        } else {
-            res.status(404).send("Goal not found");
-        }
+        const {date: type} = req.body
+        console.log("updateGoal in controller.js is running");
+        console.log("ID:", id);
+        console.log("New Date:", type);
+        console.log(req.body)
+        const index = goals.findIndex(gl => {
+            console.log(id)
+            return gl.id === +id
+        })
+
+        goals[index].date = type;
+        res.status(200).send(goals);
+        
+        // const index = goals.findIndex(gl => gl.id === +id);
+        // if (index !== -1) {
+        //     goals[index].date = date;
+        //     res.status(200).send(goals[index]); // Sending back the updated goal
+        // } else {
+        //     res.status(404).send("Goal not found");
+        // }
+        // console.log("updateGoal in controller.js is running")
+        // console.log(id)
+        // const valueOfItem = type ? type.value : undefined
+
+        // // console.log(req.body)
+
+        // if (valueOfItem !== undefined) {
+        //     console.log("it is not undefined")
+        // } else {
+        //     console.log("Date value is missing or invalid")
+        //     res.status(400).send("Date value is missing or invalid");
+        // }
+
+        // const index = goals.findIndex(gl => gl.id === +id);
+        // if (index !== -1) {
+        //     goals[index].date = date
+        //     res.status(200).send(goals[index]) // Sending back the updated goal
+        // } else {
+        //     res.status(404).send("Goal not found")
+        // }
     }
 
 }

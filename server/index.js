@@ -9,6 +9,7 @@ app.use(express.json());
 
 const { getCompliment,
         getFortune,
+        getGoal,
         createGoal,
         deleteGoal,
         updateGoal } = require('./controller')
@@ -16,6 +17,7 @@ const { getCompliment,
 
 app.get("/api/compliment", getCompliment);
 app.get('/api/fortune', getFortune)
+app.get('/api/goals', getGoal)
 app.post('/api/goals', createGoal)
 app.delete('/api/goals/:id', deleteGoal)
 app.put('/api/goals/:id', updateGoal)
